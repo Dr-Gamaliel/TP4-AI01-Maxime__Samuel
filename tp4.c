@@ -1,4 +1,5 @@
 #include "tp4.h"
+/// mise en place du menu
 void color(int t,int f)
 {
         HANDLE H=GetStdHandle(STD_OUTPUT_HANDLE);
@@ -82,4 +83,32 @@ int menu( char** tab, COORD O)
         }
     }while(k!=13);
     return(choix);
+}
+/// mise en place des fonctions de base
+T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase)
+{
+    T_Position* x, *inserable;
+    x=listeP;
+    inserable=malloc(sizeof(T_Position));
+    inserable->numeroLigne=ligne;
+    inserable->numeroPhrase=phrase;
+    inserable->ordre=ordre;
+    if(x=NULL)
+    {
+        x=inserable;
+    }
+    else
+    {
+        while(x->suivant!=NULL)
+        {
+            if(x->suivant->numeroLigne>=ligne && x->suivant->ordre>ordre)
+            {
+                break;
+            }
+            x=x->suivant;
+        }
+        inserable->suivant=x->suivant;
+        x->suivant=inserable;
+    }
+    return(x);
 }
