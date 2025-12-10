@@ -7,9 +7,9 @@ int main()
     initialisation(LM);
     do
     {
-        CONSOLE_SCREEN_BUFFER_INFO BUF;
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &BUF);
-        choix=menu(LM,BUF.dwCursorPosition);
+        /*CONSOLE_SCREEN_BUFFER_INFO BUF;
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &BUF);*/
+        choix=menu(LM);//,BUF.dwCursorPosition);
         system("cls");
         switch (choix)
         {

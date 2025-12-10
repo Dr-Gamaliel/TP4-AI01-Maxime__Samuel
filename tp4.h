@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <windows.h>
-#include <conio.h>
-#include <wincon.h>
+//#include <windows.h>
+//#include <conio.h>
+//#include <wincon.h>
 #define KBUP 328
 #define KBDOWN 336
 
@@ -33,10 +33,10 @@ typedef struct _Index
 }T_Index;
 
 ///déclaration du menu
-void color(int t,int f);
-void gotoxy(int x, int y);
+/*void color(int t,int f);
+void gotoxy(int x, int y);*/
 void initialisation(char** LM);
-int menu(char** tab, COORD O);
+int menu(char** tab);//, COORD O);
 
 ///déclaration des fonctions
 T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase);
