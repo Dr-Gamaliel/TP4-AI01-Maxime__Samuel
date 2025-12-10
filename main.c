@@ -16,6 +16,7 @@ int main()
         case 1:
             printf("---vous etes dans le sous menu \"%s\"---\n",LM[choix]);
             printf("%s\n",LM[8]);
+            test();
             break;
         case 2:
             printf("---vous etes dans le sous menu \"%s\"---\n",LM[choix]);

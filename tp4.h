@@ -40,4 +40,5 @@ int menu(char** tab);//, COORD O);
 
 ///déclaration des fonctions
 T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase);
+void test();
 #endif // TP4_H_INCLUDED
