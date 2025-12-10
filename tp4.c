@@ -31,10 +31,10 @@ void initialisation(char** LM)
     strcpy(LM[8],"Cette partie sera disponible bientot");
 }
 
-int menu( char** tab)//, COORD O)
+int menu( char** tab)/*, COORD O)
 {
-    //system("cls");
-    //O.Y=+2;
+    system("cls");
+    O.Y=+2;*/{
     int choix=1, k=0;
     do
     {
@@ -112,3 +112,4 @@ T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase
     }
     return(x);
 }
+
