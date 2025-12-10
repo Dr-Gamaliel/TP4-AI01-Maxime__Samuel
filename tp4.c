@@ -93,23 +93,34 @@ T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase
     inserable->numeroLigne=ligne;
     inserable->numeroPhrase=phrase;
     inserable->ordre=ordre;
-    if(x=NULL)
+    inserable->suivant=NULL;
+    if(x==NULL)
     {
         x=inserable;
     }
     else
     {
-        while(x->suivant!=NULL)
+        if(x->numeroLigne>=ligne && x->ordre>ordre)
         {
-            if(x->suivant->numeroLigne>=ligne && x->suivant->ordre>ordre)
-            {
-                break;
-            }
-            x=x->suivant;
+            inserable->suivant=x;
+            x=inserable;
         }
-        inserable->suivant=x->suivant;
-        x->suivant=inserable;
+        else
+        {
+            while(x->suivant!=NULL)
+            {
+                if(x->suivant->numeroLigne>=ligne && x->suivant->ordre>ordre)
+                {
+                    break;
+                }
+                x=x->suivant;
+            }
+            inserable->suivant=x->suivant;
+            x->suivant=inserable;
+            x=listeP;
+        }
     }
     return(x);
 }
+
 
