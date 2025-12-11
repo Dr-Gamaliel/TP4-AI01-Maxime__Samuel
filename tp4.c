@@ -232,32 +232,57 @@ int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordre, int phrase
     }
 }
 
-/*
-chien[(1,1,4)] chat[(2,1,4)] droit[(1,1,4);(2,2,3);(3,3,1)] bateau[(1,1,4)] cheval(3,3,3) avion(2,2,3) besoin(1,1,2) chef(8,2,3) chevre(3,1,3) chatte(1,1,3) dortoir(1,1,3) sorcier(1,6,3)
-*/
+
+void afficher_noeud(T_Noeud* X)
+{
+    if(X)
+    {
+        printf("%c%c%s(%d)\n",TABLEAU_GAUCHE_HAUT, HORIZONTALE, X->mot, X->nbOccurences);
+        T_Position* y;
+        y=X->listePositions;
+        while(y!=NULL)
+        {
+            if(y->suivant)
+                printf("%c%c(l=%d,o=%d,p=%d)\n",VERTICALE, HORIZONTALE,y->numeroLigne,y->ordre,y->numeroPhrase);
+            else
+                printf("%c%c(l=%d,o=%d,p=%d)\n\n",TABLEAU_GAUCHE_BAS, HORIZONTALE,y->numeroLigne,y->ordre,y->numeroPhrase);
+            y=y->suivant;
+        }
+    }
+}
+void parcours_infixe(T_Noeud* X)
+{
+    if(X!=NULL)
+    {
+        parcours_infixe(X->filsGauche);
+        afficher_noeud(X);
+        parcours_infixe(X->filsDroit);
+    }
+}
+
+
+//chien[(1,7,4)] chat[(2,1,4)] droit[(1,1,4);(2,2,3);(3,3,1)] bateau[(1,5,7)] cheval(3,3,3) avion(2,2,3)
+//besoin(1,1,2) chef(8,2,3) chevre(3,1,3) chatte(1,1,3) dortoir(1,9,3) sorcier(1,6,3)
 
 void test()
 {
-    T_Index* index;
-    T_Noeud* x;
-    T_Position* y;
+    T_Index* index; T_Noeud* x;
     index=malloc(sizeof(T_Index));
-    for(int i=0; i<12; i++)
-    {
-        printf("resultat de l'ajour%d: %d\n",i+1,ajouterOccurence(index,"chien",1,4,1));
-    }
-    x=index->racine;i=1;
-    while(x!=NULL)
-    {
-        printf("l'element %s de l'index, apparait %d fois",x->mot, x->nbOccurences);
-        y=x->listePositions;
-        int i=1;
-        while(y!=NULL)
-        {
-            printf("fois %d:dans la ligne %d a l'ordre %d et dans la phrase %d\n",i,y->numeroLigne,y->ordre,y->numeroPhrase);
-            i++;
-            y=y->suivant
-        }
-        x=x->filsGauche;
-    }
+    int i=1;
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"chien",1,4,7));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"chat",2,4,1));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"droit",1,4,1));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"droit",1,3,2));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"droit",3,1,3));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"bateau",1,7,5));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"cheval",3,3,3));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"avion",2,3,2));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"besoin",1,2,1));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"chef",8,3,2));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"chevre",3,3,1));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"chatte",1,3,1));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"dortoir",1,3,9));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"sorcier",1,3,6));
+    x=index->racine;
+    parcours_infixe(x);
 }

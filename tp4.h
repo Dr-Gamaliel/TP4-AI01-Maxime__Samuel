@@ -8,6 +8,10 @@
 //#include <wincon.h>
 #define KBUP 328
 #define KBDOWN 336
+#define HORIZONTALE 196
+#define VERTICALE 195
+#define TABLEAU_GAUCHE_HAUT 218
+#define TABLEAU_GAUCHE_BAS 192
 
 /// déclaration de la structure
 typedef struct _Position
@@ -41,4 +45,6 @@ int menu(char** tab);//, COORD O);
 ///déclaration des fonctions
 T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase);
 void test();
+void afficher_noeud(T_Noeud* X);
+void parcours_infixe(T_Noeud* X);
 #endif // TP4_H_INCLUDED
