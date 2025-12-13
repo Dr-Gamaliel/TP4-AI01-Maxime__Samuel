@@ -86,7 +86,7 @@ int menu( char** tab)//, COORD O)
     return(choix);
 }
 /// mise en place des fonctions de base
-T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase)
+T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase,int* maj)
 {
     T_Position* x, *inserable;
     x=listeP;
@@ -105,6 +105,7 @@ T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase
         {
             inserable->suivant=x;
             x=inserable;
+            *maj=1;
         }
         else
         {
@@ -116,8 +117,12 @@ T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase
                 }
                 x=x->suivant;
             }
-            inserable->suivant=x->suivant;
-            x->suivant=inserable;
+            if(x->numeroLigne!=ligne && x->ordre!=ordre)
+            {
+                    inserable->suivant=x->suivant;
+                    x->suivant=inserable;
+                    *maj=1;
+            }
             x=listeP;
         }
     }
@@ -126,6 +131,8 @@ T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase
 
 int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordre, int phrase) ///ne pas oublier de considerer le point
 {
+    int *maj=malloc(sizeof(int));
+    *maj=0;
     if (index == NULL || mot == NULL) return 0;
 
     // Création de motTraite un copie du mot en cours tt en minuscule pour pouvoire faciliter le traitement
@@ -161,7 +168,7 @@ int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordre, int phrase
         nouveau-> filsDroit = NULL ;
         nouveau->listePositions = NULL ;
         // Appele de la fonction de Samuel pour ajt la position
-        nouveau->listePositions = ajouterPosition(nouveau->listePositions, ligne, ordre, phrase);
+        nouveau->listePositions = ajouterPosition(nouveau->listePositions, ligne, ordre, phrase,maj);
 
         // J e met le noeud à la racine de l'index
         index->racine = nouveau;
@@ -176,12 +183,14 @@ int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordre, int phrase
     T_Noeud *courant = index->racine;
     while (1)
     {
-        int comparaison = strcmp(motTraite, courant->mot);
+        int comparaison ;
+        comparaison = strcmp(motTraite, courant->mot);
         // Si mot identique
         if (comparaison == 0)
         {
-            courant->listePositions = ajouterPosition(courant->listePositions, ligne, ordre, phrase);
-            courant->nbOccurences++;
+            courant->listePositions = ajouterPosition(courant->listePositions, ligne, ordre, phrase,maj);
+            if (*maj==1)
+                courant->nbOccurences++;
             index->nbMotsTotal++; // On a un mot de plus au total
             return 1;
         }
@@ -198,7 +207,7 @@ int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordre, int phrase
                 nouveau->filsGauche = NULL;
                 nouveau->filsDroit = NULL;
                 nouveau->listePositions = NULL;
-                nouveau->listePositions = ajouterPosition(nouveau->listePositions, ligne, ordre, phrase);
+                nouveau->listePositions = ajouterPosition(nouveau->listePositions, ligne, ordre, phrase,maj);
                 courant->filsGauche = nouveau; // On attache le nouveau noeud
                 index->nbMotsDistincts++;
                 index->nbMotsTotal++;
@@ -221,7 +230,7 @@ int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordre, int phrase
                 nouveau->filsGauche = NULL;
                 nouveau->filsDroit = NULL;
                 nouveau->listePositions = NULL;
-                nouveau->listePositions = ajouterPosition(nouveau->listePositions, ligne, ordre, phrase);
+                nouveau->listePositions = ajouterPosition(nouveau->listePositions, ligne, ordre, phrase,maj);
                 courant->filsDroit = nouveau; // On attache le nouveau noeud
                 index->nbMotsDistincts++;
                 index->nbMotsTotal++;
@@ -230,59 +239,158 @@ int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordre, int phrase
             courant = courant->filsDroit;
         }
     }
+    free (maj);
 }
 
+T_Noeud* rechercherMot(T_Index* index, char *mot)
+{
+    T_Noeud* X;
+    X=NULL;
+    if(index)
+    {
+        X=index->racine;
+        int trouve=0;
+        while(!trouve&&X)
+        {
+            int pos;
+            pos=strcmp(X->mot,mot);
+            if(pos==0)
+                trouve=1;
+            if(pos<0)
+                X=X->filsDroit;
+            if(pos>0)
+                X=X->filsGauche;
+        }
+    }
+    return(X);
+}
 
-void afficher_noeud(T_Noeud* X)
+File* creer_file(int l)
+{
+    File* F=malloc(sizeof(File));
+    F->Longueur=l+1;
+    F->head=0;
+    F->tail=0;
+    F->tab=malloc(sizeof(T_Noeud)*l+1);
+    return(F);
+}
+int est_vide(File* F)
+{
+    if(F)
+        return(F->head==F->tail);
+    return(1);
+}
+int est_pleine(File* F)
+{
+    if(F)
+        return(F->head==(F->tail+1)%F->Longueur);
+    return (1);
+}
+void enfiler(File* F, const T_Noeud* n)
+{
+    if(!est_pleine(F))
+    {
+        F->tab[F->tail]=*n;
+        if (F->tail==F->Longueur-1)
+            F->tail=0;
+        else
+            F->tail++;
+    }
+}
+const T_Noeud* defiler(File* F)
+{
+    if(!est_vide(F))
+    {
+        const T_Noeud* a=&(F->tab[F->head]);
+        if (F->head==F->Longueur-1)
+            F->head=0;
+        else
+            F->head++;
+        return(a);
+    }
+    return(NULL);
+}
+
+void afficher_noeud(const T_Noeud* X)
 {
     if(X)
     {
-        printf("%c%c%s(%d)\n",TABLEAU_GAUCHE_HAUT, HORIZONTALE, X->mot, X->nbOccurences);
+        char mot[100];
+        strcpy(mot,X->mot);
+        mot[0]=mot[0]+'A'-'a';
+        printf("|-- %s(%d)\n", mot, X->nbOccurences);
         T_Position* y;
         y=X->listePositions;
         while(y!=NULL)
         {
-            if(y->suivant)
-                printf("%c%c(l=%d,o=%d,p=%d)\n",VERTICALE, HORIZONTALE,y->numeroLigne,y->ordre,y->numeroPhrase);
-            else
-                printf("%c%c(l=%d,o=%d,p=%d)\n\n",TABLEAU_GAUCHE_BAS, HORIZONTALE,y->numeroLigne,y->ordre,y->numeroPhrase);
+            printf("|---- (l:%d,o:%d,p:%d)\n",y->numeroLigne,y->ordre,y->numeroPhrase);
             y=y->suivant;
         }
     }
+    else
+        printf("adresse nulle");
 }
-void parcours_infixe(T_Noeud* X)
+void parcours_infixe(T_Noeud* X, File* F)
 {
     if(X!=NULL)
     {
-        parcours_infixe(X->filsGauche);
-        afficher_noeud(X);
-        parcours_infixe(X->filsDroit);
+        parcours_infixe(X->filsGauche,F);
+        enfiler(F,X);
+        parcours_infixe(X->filsDroit,F);
     }
 }
-
+void afficherIndex(T_Index* index)
+{
+    if(index)
+    {
+        File* F=creer_file(index->nbMotsDistincts+1);
+        parcours_infixe(index->racine,F);
+        char title='a';
+        const T_Noeud* X=defiler(F);
+        while(X)
+        {
+            if(X && X->mot[0]==title)
+                printf("\n\n%c\n",title+'A'-'a');
+            while(X && X->mot[0]==title)
+            {
+                afficher_noeud(X);
+                X=defiler(F);
+                if(X && X->mot[0]==title)
+                    printf("|\n");
+            }
+            title++;
+        }
+    }
+}
 
 //chien[(1,7,4)] chat[(2,1,4)] droit[(1,1,4);(2,2,3);(3,3,1)] bateau[(1,5,7)] cheval(3,3,3) avion(2,2,3)
 //besoin(1,1,2) chef(8,2,3) chevre(3,1,3) chatte(1,1,3) dortoir(1,9,3) sorcier(1,6,3)
 
 void test()
 {
-    T_Index* index; T_Noeud* x;
+    T_Index* index;
     index=malloc(sizeof(T_Index));
+    index->racine=NULL;
     int i=1;
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"chien",1,4,7));
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"chat",2,4,1));
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"droit",1,4,1));
-    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"droit",1,3,2));
-    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"droit",3,1,3));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"droit",2,1,2));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"Droit",3,1,3));
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"bateau",1,7,5));
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"cheval",3,3,3));
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"avion",2,3,2));
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"besoin",1,2,1));
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"chef",8,3,2));
-    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"chevre",3,3,1));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"Chevre",3,3,1));
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"chatte",1,3,1));
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"dortoir",1,3,9));
     printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"sorcier",1,3,6));
-    x=index->racine;
-    parcours_infixe(x);
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"Quis",2,16,8));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"quisque",1,0,3));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"Risus",1,2,3));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"sit",0,3,0));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"sit",2,8,7));
+    printf("resultat de l'ajour %d: %d\n",i++,ajouterOccurence(index,"SiT",3,6,10));
+    afficherIndex(index);
 }

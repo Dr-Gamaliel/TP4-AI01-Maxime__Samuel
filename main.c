@@ -41,12 +41,14 @@ int main()
         case 7:
             printf("---vous etes dans le sous menu \"%s\"---\n",LM[choix]);
             printf("sortie en cours...\n");
+            goto etiquette;
             break;
         default:
             printf("choix etrange\n");
             break;
         }
         system("pause");
+        etiquette:
     }while(choix!=7);
     return 0;
 }
