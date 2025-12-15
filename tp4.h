@@ -8,17 +8,15 @@
 //#include <wincon.h>
 #define KBUP 328
 #define KBDOWN 336
-#define HORIZONTALE 196
-#define VERTICALE 195
-#define TABLEAU_GAUCHE_HAUT 218
-#define TABLEAU_GAUCHE_BAS 192
 
-/// déclaration des structures
+/// dÃ©claration des structures
 typedef struct _Position
 {
     int numeroLigne;
-    int ordre;
+    int ordreLigne;
     int numeroPhrase;
+    int ordrePhrase;
+    char* memory;
     struct _Position* suivant;
 }T_Position;
 typedef struct _Noeud
@@ -28,41 +26,79 @@ typedef struct _Noeud
     T_Position* listePositions;
     struct _Noeud* filsGauche;
     struct _Noeud* filsDroit;
+    int hauteur;
 }T_Noeud;
 typedef struct _Index
 {
     T_Noeud* racine;
     int nbMotsDistincts;
     int nbMotsTotal;
+    int nbPoints;
+    char *nomFichier;
 }T_Index;
 
-/// on crée une structure file pour le stockage des éléments de l'arbre en vue de leur traitement à la fin du parcours
-typedef struct _File
+/// structure et fonction pour l'affichage des occurences d'un mot
+///-------structures------
+typedef struct _celluleMot
 {
-    T_Noeud* tab;
-    int head;
-    int tail;
+    char* mot;
+}celluleMot;
+
+typedef struct _Pile
+{
+    celluleMot* tab;
+    int* ligne;
+    int sommet;
     int Longueur;
-}File;
-// on défini les fonctions élémentaires de la file
-File* creer_file(int l);//O(1)
-int est_vide(File* F);//O(1)
-int est_pleine(File* F);//O(1)
-void enfiler(File* F, const T_Noeud* n);//O(1)
-const T_Noeud* defiler(File* F);//O(1)
+}Pile;
+
+typedef struct _element
+{
+    int numphrase;
+    Pile* phrase;
+}Element;
+///-------fonctions ------
+Pile* creer_pile(int l);//O(n)//au pire des cas, le texte tout entier ne contient qu'une phrase, celle que l'on veut recrÃ©er
+void supprimer_Pile(Pile* P);//O(1)
+int est_vide(Pile* P);//O(1)
+int est_pleine(Pile* P);//O(1)
+void empiler(Pile* P, char* mot, int ordre,int ligne);//O(1)
+char* depiler(Pile* P);//O(1)
+int dicho_search(Element* tab, int X, int debut, int fin);//O(log(n))
+void parcours_position(T_Position* X, Element* E, int taille_E);//O(n)
+void parcours_infixe(T_Noeud* X, Element* E, int taille_E);//O(n)
 
 
-///déclaration du menu
-/*void color(int t,int f); //O(1)
-void gotoxy(int x, int y);//O(1) */
+/*typedef struct CellulePhrase {
+    int numeroPhrase;
+    T_CelluleMot *listeMots;
+    struct CellulePhrase *suivant;
+} T_CellulePhrase;*/
+
+///dÃ©claration du menu
+/*void color(int t,int f);//O(1)
+void gotoxy(int x, int y);//O(1)*/
 void initialisation(char** LM);//O(1)
 int menu(char** tab);//, COORD O);//O(1)
 
-///déclaration des fonctions
-T_Position* ajouterPosition(T_Position* listeP, int ligne, int ordre, int phrase,int* maj); //O(n)(n= nombre d'occurences du mot)
-T_Noeud* rechercherMot(T_Index* index, char *mot);//O(n)
-void test();//cette fonction est utilisée pour tester nos programmes en cours de devellopement
-void afficher_noeud(const T_Noeud* X);//cette fonction permet d'afficher l'information située à un noeud
-void parcours_infixe(T_Noeud* X, File* F);//cette fonction permet de parcourir l'arbre par ordre croissant// O(m)
-void afficherIndex(T_Index* index);//cette fonction permet d'afficher les elements par ordre alphabétique//O(m*n)
-#endif // TP4_H_INCLUDED
+///dÃ©clarations des fonctions secondaires
+int maxi(int a, int b);//O(1)
+int hauteur(T_Noeud *N);//O(1)
+int getEquilibre(T_Noeud *N);//O(1)
+T_Noeud *rotationDroite(T_Noeud *y);//O(1)
+T_Noeud *rotationGauche(T_Noeud *x);//O(1)
+T_Noeud* insererAVL(T_Noeud* node, char* mot_traite, char* mot_init, int ligne, int ordreL, int phrase, int ordreP, int* estNouveau);//O(n)//oÃ¹ n est le nombre de mots au total dans le text
+void afficherArbreRec(T_Noeud *noeud, char *derniereLettre);//O(n)//car on parcours tous les mots du textes, pas seuleument les mots distincs
+
+
+///dÃ©claration des fonctions principales
+T_Position* ajouterPosition(T_Position* listeP, char* mot,int ligne, int ordreL, int phrase, int ordreP, int* maj);//O(k)//oÃ¹ k est le max(nboccurences)
+int indexerFichier(T_Index *index,T_Position** Point, char *filename);//O(n^2)//car en principe dans une phrase on a plus de points que de mots
+int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordreL, int phrase, int ordreP);//O(n)//oÃ¹ n est le nombre de mots au total dans le texte
+T_Noeud* rechercherMot(T_Index* index, char *mot);//O(m) //oÃ¹ m est le nombre de mots distincs du texte, car on ne parcours que les noeuds de l'AVL
+void afficherIndex(T_Index index);//O(m)// elle ne fait qu'utiliser la fonction afficherArbreRec
+void afficherOccurencesMot(T_Index* index, T_Position* Point, char *mot);//O(n)//voir implÃ©mentation dans tp4_out.c pour les explications
+///fonction en attente
+void construireTexte(T_Index index, char *filename);
+
+#endif
