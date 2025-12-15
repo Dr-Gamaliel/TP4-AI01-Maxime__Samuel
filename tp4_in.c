@@ -221,7 +221,7 @@ int indexerFichier(T_Index *index,T_Position** Point, char *filename) {
         }
         else {
             // C'est un séparateur (espace, ponctuation, retour ligne...)
-            // 1. Si on avait un mot en cours, on l'enregistre
+            // Si on avait un mot en cours, on l'enregistre
             if (i > 0) {
                 motBuffer[i] = '\0';
                 ajouterOccurence(index, motBuffer, ligne, ordreL, phrase, ordreP);
@@ -231,12 +231,11 @@ int indexerFichier(T_Index *index,T_Position** Point, char *filename) {
                 i = 0;
             }
 
-            // 2. Gestion spécifique des séparateurs
+            // Gestion spécifique des séparateurs
             if (c == '\n') {
                 ligne++;
                 ordreL = 1;
             }
-            // MODIFICATION ICI : On ne gère QUE le point '.'
             else if (c == '.') {
                 *Point=ajouterPosition(*Point,"POINT",ligne, ordreL, phrase,ordreP,&maj);
                 if(maj)
