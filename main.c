@@ -22,7 +22,7 @@ int main()
     // Variables temporaires pour les saisies
     char nomFichier[100];
     char motRecherche[100];
-    //char nomFichierSortie[100];
+    char nomFichierSortie[100];
     int nbMotsLus = 0;
     T_Noeud *resultatRecherche = NULL;
 
@@ -40,9 +40,9 @@ int main()
         {
         case 1: // Charger un fichier
             printf("--- %s ---\n", LM[choix]);
-            /*printf("Entrez le nom du fichier a charger (ex: texte.txt) : ");
-            scanf("%s", nomFichier);*/
-            strcpy(nomFichier,"test_marche.txt");
+            printf("Entrez le nom du fichier a charger (ex: texte.txt) : ");
+            scanf("%s", nomFichier);
+            //strcpy(nomFichier,"test_marche.txt");
 
             index.racine = NULL;
             index.nbMotsDistincts = 0;
@@ -51,7 +51,7 @@ int main()
 
             *Point=NULL;
 
-            nbMotsLus = indexerFichier(&index,Point, nomFichier);
+            nbMotsLus = indexerFichier(&index, nomFichier);
 
             if (nbMotsLus > 0) {
                 printf("Success!! %d mots ont ete lus et indexes.\n", nbMotsLus);
@@ -94,7 +94,7 @@ int main()
                     printf("Mot trouve ! Occurences : %d\n", resultatRecherche->nbOccurences);
                     T_Position *p = resultatRecherche->listePositions;
                     while (p != NULL) {
-                        printf("- Ligne %d, Ordre ligne %d, Phrase %d, Ordre phrase %d\n ", p->numeroLigne, p->ordreLigne, p->numeroPhrase, p->ordrePhrase);
+                        printf("- Ligne n°%d | Ordre dans la ligne : %d | Phrase n° %d | Ordre dans la phrase :%d\n", p->numeroLigne, p->ordreLigne, p->numeroPhrase, p->ordrePhrase);
                         p = p->suivant;
                     }
                 } else {
@@ -110,20 +110,21 @@ int main()
             } else {
                 printf("Entrez le mot dont vous voulez voir les phrases contextuelles : ");
                 scanf("%s", motRecherche);
-                afficherOccurencesMot(&index,*Point,motRecherche);
+                afficherOccurencesMot(&index,motRecherche);
             }
             break;
 
         case 6: // Construire le texte
             printf("--- %s ---\n", LM[choix]);
-            printf("%s\n", LM[8]);
-            /*if (index.nbMotsTotal == 0) {
-                printf("L'index est vide.\n");
+            
+            if (index.nbMotsTotal == 0) {
+                printf("L'index est vide. Chargez un fichier d'abord.\n");
             } else {
                 printf("Entrez le nom du fichier de sortie (ex: sortie.txt) : ");
                 scanf("%s", nomFichierSortie);
+                
                 construireTexte(index, nomFichierSortie);
-            }*/
+            }
             break;
 
         case 7: // Quitter

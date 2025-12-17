@@ -44,6 +44,7 @@ void afficherIndex(T_Index index)
 //ensuite on reparcours l'arbre en stoquant tous les mots dont le numPhrase est un elt->num du tableau, dans la case correspondante à sa phrase et à l'ordre correspondant à son ordre
 //ce qui nous permet au pire des cas de faire un parcours de l'ordre de la taille du texte tout entier
 
+/*
 // on définit les fonctions qui permettront de gérer la file représentant une phrase
 Pile* creer_pile(int l)
 {
@@ -64,6 +65,7 @@ void supprimer_Pile(Pile* P)
     free(P->tab);
     free(P);
 }
+
 int est_vide(Pile* P)
 {
     if(P)
@@ -156,74 +158,107 @@ void parcours_infixe(T_Noeud* X, Element* E, int taille_E)
         parcours_infixe(X->filsDroit,E, taille_E);
     }
 }
-
-void afficherOccurencesMot(T_Index* index,T_Position* Point,char* mot)
+*/
+void afficherOccurencesMot(T_Index* index, char* mot)
 {
-    T_Noeud* cible, *node=index->racine;
-    T_Position* X;
-
-    // on recherche dans notre AVL le mot cible (O(log(m)recherche dans un AVL)
-    cible=rechercherMot(index,mot);
-    if(cible)
-    {
-        X=cible->listePositions;
-        Element* tableau_Phrase=malloc(sizeof(Element)*cible->nbOccurences);
-        //char* word=malloc(sizeof(char));
+    // Recherche du noeud dans l'AVL
+    T_Noeud* cible = rechercherMot(index, mot);
     
-        //on rempli les numéros des différentes phrases dans le tableau par orde croissant
-        for(int i=0; i<cible->nbOccurences; i++)
-           {
-               tableau_Phrase[i].numphrase=X->numeroPhrase;
-    
-               //on recherche le point correspondant à chacune des phrases contenant notre mot cibe phrase qui va nous donner le nombre de mots contenu dans la phrase//O(x)où x est le nombre de phrase dans notre texte, forcément inférieur à n
-               T_Position* Y=Point; int taille_phrase=0;
-                while(Y)
-               {
-                   if(Y->numeroPhrase==X->numeroPhrase)
-                    {
-                        taille_phrase=Y->ordrePhrase-1;
-                        break;
-                    }
-                    Y=Y->suivant;
-               }
-               tableau_Phrase[i].phrase=creer_pile(taille_phrase);
-               X=X->suivant;
-           }
-           // on parcours l'arbre(O(m) où m est le nombre de mot distincs),
-           //et pour chaque mot, on parcours les positions(O(k) où k est le max des nombres d'occurences),
-           //si une position est dans une des phrases de notre tableau (O(log(k) par recherche dichotomique)) on empile le mot (O(1) pile)
-           //Au final, on a parcouru chaque mot du texte une et une seule fois après la recherche de notre cible. On a donc fair O(n) après la recherche de la cible or n>=m on est donc bien en O(n)
-           parcours_infixe(node,tableau_Phrase,cible->nbOccurences-1);
-    
-           ///cette fonction ne sert qu'à l'affichage
-           printf("Mot = \"%s\"\nOccurences = %d", mot, cible->nbOccurences);
-           for(int i=0; i<cible->nbOccurences; i++)
-           {
-               int nbmotsaffiche=1;//cette variable nous permet de savoir si nous sommes à la fin de la phrase
-               printf("\n| Ligne ");
-               for(int j=0; j<10;j++)
-                if(tableau_Phrase[i].phrase->ligne[j]) printf("%d, ",tableau_Phrase[i].phrase->ligne[j]);
-               printf("mot %d : ",tableau_Phrase[i].phrase->Longueur);
-               while(!est_vide(tableau_Phrase[i].phrase))
-               {
-                   if(tableau_Phrase[i].phrase->Longueur==nbmotsaffiche)
-                        printf("%s",depiler(tableau_Phrase[i].phrase));
-                   else
-                        printf("%s ",depiler(tableau_Phrase[i].phrase));
-                   nbmotsaffiche++;
-                   //on libère la mémoire contenant chacun de nos mots stockés temporairement
-                   free(tableau_Phrase[i].phrase->tab[tableau_Phrase[i].phrase->sommet+1].mot);
-               }
-               printf(".");
-           }
-           //on libère la mémoire nous ayans servi pour la recherche
-           for(int i=0; i<cible->nbOccurences; i++)
-            supprimer_Pile(tableau_Phrase[i].phrase);
-           free(tableau_Phrase);
+    if (!cible) {
+        printf("Le mot \"%s\" est absent du texte.\n", mot);
+        return;
     }
-    else
-        printf("mot absent du texte");
+
+    printf("Mot = \"%s\"\nOccurences = %d\n", cible->mot, cible->nbOccurences);
+
+    T_Position* p = cible->listePositions;
+    
+    // Pour chaque occurrence du mot trouvé
+    while (p != NULL) {
+        printf("\n| Ligne %d, Phrase %d : ", p->numeroLigne, p->numeroPhrase);
+
+        // On remonte via precTexte tant qu'on est dans la même phrase
+        T_Position* curseur = p;
+        while (curseur->precTexte != NULL && curseur->precTexte->numeroPhrase == p->numeroPhrase) {
+            curseur = curseur->precTexte;
+        }
+
+        // On affiche tant qu'on est dans la même phrase
+        while (curseur != NULL && curseur->numeroPhrase == p->numeroPhrase) {
+            
+
+            if (strcmp(curseur->memory, "POINT") == 0) {
+                printf(".");
+            } else {
+                printf("%s ", curseur->memory);
+            }
+            
+            curseur = curseur->suivTexte;
+        }
+        
+        // Passage à l'occurrence suivante du mot cible
+        p = p->suivant;
+    }
+    printf("\n");
 }
+
+
+
+
+void construireTexte(T_Index index, char *filename) {
+    if (index.debutTexte == NULL) {
+        printf("L'index est vide ou debutTexte non initialise.\n");
+        return;
+    }
+
+    FILE *fp = fopen(filename, "w");
+    if (fp == NULL) {
+        printf("Erreur d'ouverture fichier %s\n", filename);
+        return;
+    }
+
+    // On part du tout premier mot du texte sauvegarde dans indexerfich
+    T_Position* p = index.debutTexte;
+    int ligneActuelle = p->numeroLigne;
+
+    while (p != NULL) {
+        
+        // Gestion des sauts de ligne
+        while (ligneActuelle < p->numeroLigne) {
+            fprintf(fp, "\n");
+            ligneActuelle++;
+        }
+
+        // Si c'est un POINT
+        if (p->memory && strcmp(p->memory, "POINT") == 0) {
+            fprintf(fp, ".");
+        } 
+        // Si c'est un MOT normal
+        else if (p->memory) {
+            fprintf(fp, "%s", p->memory);
+            
+            // On ajoute un espace après le mot SEULEMENT SI :
+            if (p->suivTexte != NULL && 
+                p->suivTexte->memory != NULL && 
+                strcmp(p->suivTexte->memory, "POINT") != 0) {
+                fprintf(fp, " ");
+            }
+        }
+
+        // On suit le fil d'Ariane vers le mot suivant
+        p = p->suivTexte;
+    }
+
+    fclose(fp);
+    printf("Texte reconstruit avec succes dans '%s'.\n", filename);
+}
+
+
+
+
+
+
+
 
 
 /*

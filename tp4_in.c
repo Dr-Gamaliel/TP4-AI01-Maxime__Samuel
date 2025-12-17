@@ -42,125 +42,138 @@ T_Noeud *rotationGauche(T_Noeud *x) {
     return y;
 }
 
-T_Noeud* insererAVL(T_Noeud* node, char* mot_traite, char* mot_init, int ligne, int ordreL, int phrase, int ordreP, int* estNouveau) {
-    int* maj= malloc(sizeof(int));
-    *maj=0;
+T_Noeud* insererAVL(T_Noeud* node, char* mot_traite, char* mot_init, int ligne, int ordreL, int phrase, int ordreP, int* estNouveau, T_Position** dernierPos) {
+    int maj = 0; 
+
     if (node == NULL) {
         T_Noeud* nouveau = malloc(sizeof(T_Noeud));
+        if (nouveau == NULL) return NULL; 
+
         nouveau->mot = malloc(strlen(mot_traite) + 1);
         strcpy(nouveau->mot, mot_traite);
+        
         nouveau->nbOccurences = 1;
         nouveau->listePositions = NULL;
-        nouveau->listePositions = ajouterPosition(nouveau->listePositions, mot_init,ligne, ordreL, phrase, ordreP,maj);
+        
+        nouveau->listePositions = ajouterPosition(nouveau->listePositions, mot_init, ligne, ordreL, phrase, ordreP, &maj, dernierPos);
+        
         nouveau->filsGauche = NULL;
         nouveau->filsDroit = NULL;
         nouveau->hauteur = 1;
+        
         *estNouveau = 1;
         return nouveau;
     }
 
-
-    // Savoir ou j'insere avec le strcmp
+    // Recherche de la position d'insertion
     int cmp = strcmp(mot_traite, node->mot);
 
-    // mot qui va a gauche
-    if (cmp < 0)
-        node->filsGauche = insererAVL(node->filsGauche, mot_traite, mot_init, ligne, ordreL, phrase, ordreP, estNouveau);
-    // mot qui va a droite
-    else if (cmp > 0)
-        node->filsDroit = insererAVL(node->filsDroit, mot_traite, mot_init, ligne, ordreL, phrase, ordreP, estNouveau);
-    // mot qui existe
+    // On passe dernierPos récursivement
+    if (cmp < 0) {
+        node->filsGauche = insererAVL(node->filsGauche, mot_traite, mot_init, ligne, ordreL, phrase, ordreP, estNouveau, dernierPos);
+    }
+    else if (cmp > 0) {
+        node->filsDroit = insererAVL(node->filsDroit, mot_traite, mot_init, ligne, ordreL, phrase, ordreP, estNouveau, dernierPos);
+    }
     else {
-        node->listePositions = ajouterPosition(node->listePositions, mot_init, ligne, ordreL, phrase, ordreP,maj);
-        if(*maj)
+        // Le mot existe déjà, on ajoute la position (avec dernierPos)
+        node->listePositions = ajouterPosition(node->listePositions, mot_init, ligne, ordreL, phrase, ordreP, &maj, dernierPos);
+        
+        if(maj)
             node->nbOccurences++;
+            
         *estNouveau = 0;
         return node;
     }
 
-    // mise à jour de la hauteur du noeud ancêtre
+    // Mise à jour hauteur et équilibrage 
     node->hauteur = 1 + maxi(hauteur(node->filsGauche), hauteur(node->filsDroit));
-
-    //  equilibre
     int balance = getEquilibre(node);
 
-    // ICI GESTION DE L'EQUILIBRE
-
-    // Cas Gauche-Gauche
     if (balance > 1 && strcmp(mot_traite, node->filsGauche->mot) < 0)
         return rotationDroite(node);
 
-    // Cas Droite-Droite
     if (balance < -1 && strcmp(mot_traite, node->filsDroit->mot) > 0)
         return rotationGauche(node);
 
-    // Cas Gauche-Droite
     if (balance > 1 && strcmp(mot_traite, node->filsGauche->mot) > 0) {
         node->filsGauche = rotationGauche(node->filsGauche);
         return rotationDroite(node);
     }
 
-    // Cas Droite-Gauche
     if (balance < -1 && strcmp(mot_traite, node->filsDroit->mot) < 0) {
         node->filsDroit = rotationDroite(node->filsDroit);
         return rotationGauche(node);
     }
-    free(maj);
+
     return node;
 }
 
-
 /// FONCTIONS DU TP
-T_Position* ajouterPosition(T_Position* listeP, char* mot,int ligne, int ordreL, int phrase, int ordreP, int *maj)
+T_Position* ajouterPosition(T_Position* listeP, char* mot, int ligne, int ordreL, int phrase, int ordreP, int *maj, T_Position** dernierPos)
 {
-    T_Position* x, *inserable;
-    x=listeP;
-    inserable=malloc(sizeof(T_Position));
-    inserable->memory=malloc(sizeof(char)*100);
-    strcpy(inserable->memory,mot);
-    inserable->numeroLigne=ligne;
-    inserable->numeroPhrase=phrase;
-    inserable->ordreLigne=ordreL;
-    inserable->ordrePhrase=ordreP;
-    inserable->suivant=NULL;
+    T_Position* x = listeP;
+    T_Position* inserable = malloc(sizeof(T_Position));
+    
+    if (mot) {
+        inserable->memory = malloc(strlen(mot) + 1);
+        strcpy(inserable->memory, mot);
+    } else {
+        inserable->memory = NULL;
+    }
+
+    inserable->numeroLigne = ligne;
+    inserable->numeroPhrase = phrase;
+    inserable->ordreLigne = ordreL;
+    inserable->ordrePhrase = ordreP;
+    inserable->suivant = NULL;
+
+    inserable->precTexte = *dernierPos; 
+    inserable->suivTexte = NULL;        
+
+    if (*dernierPos != NULL) {
+        (*dernierPos)->suivTexte = inserable;
+    }
+    *dernierPos = inserable; 
+
     if(!x)
     {
-        x=inserable;
-        *maj=1;
+        x = inserable;
+        *maj = 1;
     }
     else
     {
-        // J'ai modifié le && pour un ||
         if(x->numeroLigne > ligne || (x->numeroLigne == ligne && x->ordreLigne > ordreL))
         {
-            inserable->suivant=x;
-            x=inserable;
-            *maj=1;
+            inserable->suivant = x;
+            x = inserable;
+            *maj = 1;
         }
         else
         {
-            while(x->suivant!=NULL)
+            T_Position* tete = x;
+            while(x->suivant != NULL)
             {
-                // pareil ici
                 if(x->suivant->numeroLigne > ligne || (x->suivant->numeroLigne == ligne && x->suivant->ordreLigne > ordreL))
                 {
                     break;
                 }
-                x=x->suivant;
+                x = x->suivant;
             }
-            if( x->ordreLigne != ordreL)
+            // On vérifie qu'on n'insère pas exactement la même position (doublon strict)
+            if(x->ordreLigne != ordreL || x->numeroLigne != ligne)
             {
-                inserable->suivant=x->suivant;
-                x->suivant=inserable;
-                *maj=1;
+                inserable->suivant = x->suivant;
+                x->suivant = inserable;
+                *maj = 1;
             }
-            x=listeP;// je remets x au début pour ne pas perdre la tête
+            x = tete; 
         }
     }
     return(x);
 }
 
-int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordreL, int phrase, int ordreP) {
+int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordreL, int phrase, int ordreP, T_Position** dernierPos) {
     if (index == NULL || mot == NULL) return 0;
 
     // Copie et mise en minuscule
@@ -172,20 +185,17 @@ int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordreL, int phras
         else
             motTraite[i] = mot[i];
         i++;
-    }//O(1)
+    }
     motTraite[i] = '\0';
 
     int estNouveau = 0;
 
-    // Si l'arbre est vide, on initialise le compteur total si besoin
     if (index->racine == NULL) {
         index->nbMotsDistincts = 0;
         index->nbMotsTotal = 0;
     }
 
-    // Appel de la fonction AVL récursive
-    // Notez que index->racine peut changer si la racine subit une rotation
-    index->racine = insererAVL(index->racine, motTraite, mot, ligne, ordreL, phrase, ordreP, &estNouveau);
+    index->racine = insererAVL(index->racine, motTraite, mot, ligne, ordreL, phrase, ordreP, &estNouveau, dernierPos);
 
     if (estNouveau) {
         index->nbMotsDistincts++;
@@ -194,14 +204,14 @@ int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordreL, int phras
 
     return 1;
 }
-
-int indexerFichier(T_Index *index,T_Position** Point, char *filename) {
-    index->nomFichier = filename; // Sauvegarde du nom pour l'affichage plus tard
+int indexerFichier(T_Index *index, char *filename) {
+    index->nomFichier = filename;
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Erreur : Impossible d'ouvrir le fichier %s\n", filename);
         return 0;
     }
+
     int nbMotsTotal = 0;
     int ligne = 1;
     int ordreL = 1;
@@ -212,51 +222,72 @@ int indexerFichier(T_Index *index,T_Position** Point, char *filename) {
     int i = 0;
     char c;
 
+    // Fil d'Ariane local
+    T_Position* dernierPosGlobal = NULL; 
+    index->debutTexte = NULL; 
+
     while ((c = fgetc(fp)) != EOF) {
-        int maj=0;
-        // Si c'est une lettre (majuscule ou minuscule)
-        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+        // ... (ton code de gestion des caractères ne change pas) ...
+        
+        // On accepte lettres, chiffres et tirets
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-') { 
             motBuffer[i] = c;
             i++;
         }
         else {
-            // C'est un séparateur (espace, ponctuation, retour ligne...)
-            // Si on avait un mot en cours, on l'enregistre
+            // Fin d'un mot
             if (i > 0) {
                 motBuffer[i] = '\0';
-                ajouterOccurence(index, motBuffer, ligne, ordreL, phrase, ordreP);
+                
+                // Ajout classique
+                ajouterOccurence(index, motBuffer, ligne, ordreL, phrase, ordreP, &dernierPosGlobal);
+                
+                // Capture du début du texte
+                if (index->debutTexte == NULL) {
+                    index->debutTexte = dernierPosGlobal;
+                }
+
                 nbMotsTotal++;
                 ordreL++;
                 ordreP++;
                 i = 0;
             }
 
-            // Gestion spécifique des séparateurs
+            
             if (c == '\n') {
                 ligne++;
                 ordreL = 1;
             }
+            
             else if (c == '.') {
-                *Point=ajouterPosition(*Point,"POINT",ligne, ordreL, phrase,ordreP,&maj);
-                if(maj)
-                    index->nbPoints++;
+                ajouterOccurence(index, "POINT", ligne, ordreL, phrase, ordreP, &dernierPosGlobal);
+                
+                // Sécurité début de texte (si le texte commence par un point...)
+                if (index->debutTexte == NULL) {
+                    index->debutTexte = dernierPosGlobal;
+                }
+                
+                index->nbPoints++;
+                
                 phrase++;
                 ordreP = 1;
             }
+            // ----------------------
         }
     }
 
-    // Traitement du tout dernier mot si le fichier ne finit pas par un séparateur
     if (i > 0) {
         motBuffer[i] = '\0';
-        ajouterOccurence(index, motBuffer, ligne, ordreL, phrase, ordreP);
+        ajouterOccurence(index, motBuffer, ligne, ordreL, phrase, ordreP, &dernierPosGlobal);
+        if (index->debutTexte == NULL) {
+            index->debutTexte = dernierPosGlobal;
+        }
         nbMotsTotal++;
     }
 
     fclose(fp);
     return nbMotsTotal;
 }
-
 
 
 // Samuel
