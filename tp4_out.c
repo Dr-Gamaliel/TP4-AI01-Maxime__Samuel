@@ -163,7 +163,7 @@ void afficherOccurencesMot(T_Index* index, char* mot)
 {
     // Recherche du noeud dans l'AVL
     T_Noeud* cible = rechercherMot(index, mot);
-    
+
     if (!cible) {
         printf("Le mot \"%s\" est absent du texte.\n", mot);
         return;
@@ -172,7 +172,7 @@ void afficherOccurencesMot(T_Index* index, char* mot)
     printf("Mot = \"%s\"\nOccurences = %d\n", cible->mot, cible->nbOccurences);
 
     T_Position* p = cible->listePositions;
-    
+
     // Pour chaque occurrence du mot trouvé
     while (p != NULL) {
         printf("\n| Ligne %d, Phrase %d : ", p->numeroLigne, p->numeroPhrase);
@@ -185,17 +185,20 @@ void afficherOccurencesMot(T_Index* index, char* mot)
 
         // On affiche tant qu'on est dans la même phrase
         while (curseur != NULL && curseur->numeroPhrase == p->numeroPhrase) {
-            
+
 
             if (strcmp(curseur->memory, "POINT") == 0) {
                 printf(".");
             } else {
-                printf("%s ", curseur->memory);
+                if(strcmp(curseur->suivTexte->memory, "POINT") == 0)
+                    printf("%s", curseur->memory);
+                else
+                   printf("%s ", curseur->memory);
             }
-            
+
             curseur = curseur->suivTexte;
         }
-        
+
         // Passage à l'occurrence suivante du mot cible
         p = p->suivant;
     }
@@ -222,7 +225,7 @@ void construireTexte(T_Index index, char *filename) {
     int ligneActuelle = p->numeroLigne;
 
     while (p != NULL) {
-        
+
         // Gestion des sauts de ligne
         while (ligneActuelle < p->numeroLigne) {
             fprintf(fp, "\n");
@@ -231,15 +234,15 @@ void construireTexte(T_Index index, char *filename) {
 
         // Si c'est un POINT
         if (p->memory && strcmp(p->memory, "POINT") == 0) {
-            fprintf(fp, ".");
-        } 
+            fprintf(fp, ". ");
+        }
         // Si c'est un MOT normal
         else if (p->memory) {
             fprintf(fp, "%s", p->memory);
-            
+
             // On ajoute un espace après le mot SEULEMENT SI :
-            if (p->suivTexte != NULL && 
-                p->suivTexte->memory != NULL && 
+            if (p->suivTexte != NULL &&
+                p->suivTexte->memory != NULL &&
                 strcmp(p->suivTexte->memory, "POINT") != 0) {
                 fprintf(fp, " ");
             }
@@ -254,7 +257,69 @@ void construireTexte(T_Index index, char *filename) {
 }
 
 
+void construireTexteCouleur(T_Index index, const char* mot)
+{
+    printf("\n\nVoici, dans le texte, les positions de \"%s\"\n\n",mot);
+    // On part du tout premier mot du texte sauvegarde dans indexerfich
+    T_Position* p = index.debutTexte;
+    int ligneActuelle = p->numeroLigne;
+    while (p != NULL) {
 
+        // Gestion des sauts de ligne
+        while (ligneActuelle < p->numeroLigne) {
+            printf("\n");
+            ligneActuelle++;
+        }
+
+        // Si c'est un POINT
+        if (p->memory && strcmp(p->memory, "POINT") == 0)
+        {
+            if(strcmp(mot,"POINT")==0)
+            {
+                color(12,15);
+                printf(".");
+                color(15,0);
+                printf(" ");
+            }
+            else
+                printf(". ");
+        }
+        // Si c'est un MOT normal
+        else if (p->memory)
+        {
+            char mottraite[100];
+            mottraite[99]='\0';
+            char c; int taille=strlen(p->memory);
+            for(int i=0; i<taille; i++)
+            {
+                c=p->memory[i];
+                if(c>='A'&&c<='Z') c+=32;
+                mottraite[i]=c;
+            }
+            mottraite[taille]='\0';
+
+            //si ce n'est pas le mot recherche
+            if (strcmp(mottraite, mot) != 0)
+                printf("%s", p->memory);
+            //si c'est le mot recherche
+            else
+            {
+                color(12,15);
+                printf("%s", p->memory);
+                color(15,0);
+            }
+            // On ajoute un espace après le mot SEULEMENT SI :
+            if (p->suivTexte != NULL && p->suivTexte->memory != NULL && strcmp(p->suivTexte->memory, "POINT") != 0)
+            {
+                printf(" ");
+            }
+        }
+
+        // On suit le fil d'Ariane vers le mot suivant
+        p = p->suivTexte;
+    }
+ printf("\n\n");
+}
 
 
 

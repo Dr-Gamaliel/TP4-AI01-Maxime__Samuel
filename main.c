@@ -31,9 +31,9 @@ int main()
     do
     {
         // Affiche le menu
-        /*CONSOLE_SCREEN_BUFFER_INFO BUF;
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &BUF);*/
-        choix=menu(LM);//,BUF.dwCursorPosition);
+        CONSOLE_SCREEN_BUFFER_INFO BUF;
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &BUF);
+        choix=menu(LM,BUF.dwCursorPosition);
         system("cls");
 
         switch (choix)
@@ -94,9 +94,10 @@ int main()
                     printf("Mot trouve ! Occurences : %d\n", resultatRecherche->nbOccurences);
                     T_Position *p = resultatRecherche->listePositions;
                     while (p != NULL) {
-                        printf("- Ligne n°%d | Ordre dans la ligne : %d | Phrase n° %d | Ordre dans la phrase :%d\n", p->numeroLigne, p->ordreLigne, p->numeroPhrase, p->ordrePhrase);
+                        printf("- Ligne :%d | Ordre dans la ligne : %d | Phrase : %d | Ordre dans la phrase :%d\n", p->numeroLigne, p->ordreLigne, p->numeroPhrase, p->ordrePhrase);
                         p = p->suivant;
                     }
+                    construireTexteCouleur(index,motRecherche);
                 } else {
                     printf("Le mot \"%s\" n'est pas dans l'index.\n", motRecherche);
                 }
@@ -116,13 +117,13 @@ int main()
 
         case 6: // Construire le texte
             printf("--- %s ---\n", LM[choix]);
-            
+
             if (index.nbMotsTotal == 0) {
                 printf("L'index est vide. Chargez un fichier d'abord.\n");
             } else {
                 printf("Entrez le nom du fichier de sortie (ex: sortie.txt) : ");
                 scanf("%s", nomFichierSortie);
-                
+
                 construireTexte(index, nomFichierSortie);
             }
             break;
@@ -143,7 +144,7 @@ int main()
         if (choix != 7) {
             printf("\n");
         }
-
+system("pause");
     } while(choix != 7);
 
     return 0;

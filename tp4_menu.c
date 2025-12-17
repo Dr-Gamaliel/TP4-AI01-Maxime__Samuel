@@ -1,7 +1,7 @@
 #include "tp4.h"
 
 /// mise en place du menu
-/*void color(int t,int f)
+void color(int t,int f)
 {
         HANDLE H=GetStdHandle(STD_OUTPUT_HANDLE);
             SetConsoleTextAttribute(H,f*16+t);
@@ -15,7 +15,7 @@ void gotoxy(int x, int y)
    O.Y = y;
    H= GetStdHandle(STD_OUTPUT_HANDLE);
    SetConsoleCursorPosition(H,O);
-}*/
+}
 
 void initialisation(char** LM)
 {
@@ -32,44 +32,43 @@ void initialisation(char** LM)
     strcpy(LM[8],"Cette partie sera disponible bientot");
 }
 
-int menu( char** tab)//, COORD O)
+int menu( char** tab, COORD O)
 {
-    //system("cls");
-    //O.Y=+2;
+    system("cls");
+    O.Y=+2;
     int choix=1, k=0;
     do
     {
-        /*int y=O.Y;
+        int y=O.Y;
         color(15,0);
-        gotoxy(O.X,O.Y-2);*/
+        gotoxy(O.X,O.Y-2);
         printf("\n %s\n",tab[0]);
         for (int i=1; i<8; i++)
         {
             if (i==choix)
             {
-                     /*gotoxy(O.X,y++);
-                     color(0,15);*/
+                     gotoxy(O.X,y++);
+                     color(0,15);
                      printf("%d. %s",i,tab[i]);
                      for(int j=strlen(tab[i]); j<strlen(tab[6]); j++) printf(" ");
                      printf("\n");
             }
             else
             {
-                /*gotoxy(O.X,y++);
-                color(15,0);*/
+                gotoxy(O.X,y++);
+                color(15,0);
                 printf("%d. %s",i,tab[i]);
                 for(int j=strlen(tab[i]); j<strlen(tab[6]); j++) printf(" ");
                 printf("\n");
             }
         }
-        /*k=*/scanf("%d",&k);//getch();
-        if (k<=7&&k>=1)//(k<=55&&k>=49)
+        k=getch();
+        if (k<=55&&k>=49)
         {
-            choix=k;//%49+1;
+            choix=k%49+1;
             k=13;
         }
-        else {choix=1; k=13;}
-       /* else if(k!=13)
+        else if(k!=13)
         {
             k=getch();
             if (k+256==KBDOWN)
@@ -82,7 +81,7 @@ int menu( char** tab)//, COORD O)
                 choix--;
                 if(choix==0) choix=7;
             }
-        }*/
+        }
     }while(k!=13);
     return(choix);
 }

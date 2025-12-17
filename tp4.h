@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-// #include <windows.h>
-// #include <conio.h>
-// #include <wincon.h>
+#include <windows.h>
+#include <conio.h>
+#include <wincon.h>
 
 #define KBUP 328
 #define KBDOWN 336
@@ -19,9 +19,9 @@ typedef struct _Position
     int numeroPhrase;
     int ordrePhrase;
     char* memory;
-    struct _Position* suivant;      
-    struct _Position* precTexte;    
-    struct _Position* suivTexte;    
+    struct _Position* suivant;
+    struct _Position* precTexte;
+    struct _Position* suivTexte;
 } T_Position;
 
 typedef struct _Noeud
@@ -76,7 +76,7 @@ typedef struct CellulePhrase {
 
 /// Déclaration du menu
 void initialisation(char** LM);
-int menu(char** tab);
+int menu(char** tab, COORD O);
 
 /// Fonctions utilitaires AVL
 int maxi(int a, int b);
@@ -98,6 +98,7 @@ int ajouterOccurence(T_Index *index, char *mot, int ligne, int ordreL, int phras
 
 int indexerFichier(T_Index *index, char *filename);
 T_Noeud* rechercherMot(T_Index* index, char *mot);
+void construireTexteCouleur(T_Index index, const char* mot);
 
 void afficherIndex(T_Index index);
 void afficherArbreRec(T_Noeud *noeud, char *derniereLettre);
@@ -109,11 +110,14 @@ void afficherOccurencesMot(T_Index* index, char* mot);
 void construireTexte(T_Index index, char *filename);
 
 
-/*
+
 // --- Fonctions d'affichage Console Windows ---
 void color(int t,int f);
 void gotoxy(int x, int y);
 
+
+
+/*
 // --- Fonctions de gestion des Piles ---
 Pile* creer_pile(int l);
 void supprimer_Pile(Pile* P);
