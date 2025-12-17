@@ -1,0 +1,77 @@
+\section{Hypothèses et choix techniques}
+
+Pour ce projet, nous avons privilégié l'utilisation d'arbres AVL afin de garantir une recherche rapide même avec un vocabulaire riche.
+
+\textbf{Hypothèse pour la complexité :} 
+L’intérêt d’un arbre AVL réside dans sa capacité à gérer efficacement de grands ensembles de données. Pour nos calculs de complexité, nous nous placerons donc dans le pire cas pour l’arbre, c’est-à-dire une faible redondance des mots.
+Dans cette configuration, le nombre de mots distincts $m$ tend vers le nombre total de mots $n$. Nous exprimerons donc les complexités en fonction de $n$ ($O(\log n)$ pour la recherche).
+
+\textbf{Note :} Le cas opposé (un texte composé d'un seul mot répété) rendrait l'AVL inutile et déplacerait la complexité vers les listes chaînées ($O(n^2)$), mais ce cas est considéré comme non représentatif pour notre cas d'usage.
+
+\section{Structure de données}
+
+\begin{itemize}
+    \item \textbf{T\_Position*} \\
+    Structure représentant une occurrence. Elle intègre deux systèmes de chaînage distincts. Une liste simplement chaînée pour lier les répétitions d'un même mot. Et une liste doublement chaînée pour maintenir l'ordre chronologique du texte, permettant le parcours dans les deux sens (reconstruction et recherche de début de phrase).
+    \item \textbf{T\_Noeud*} \\
+    Nœud de l'arbre AVL contenant le mot, le compteur d'occurrences et la tête de la liste des positions.
+    \item \textbf{T\_Index*} \\
+    Structure globale contenant la racine de l'arbre, les métadonnées (nombre de mots, phrases) et le point de départ du texte.
+\end{itemize}
+
+\section{Fonctions Secondaires}
+
+\begin{itemize}
+    \item \textbf{T\_Noeud* insererAVL(T\_Noeud* node, ...)} \\
+    Insère un mot ou met à jour un nœud existant, puis effectue l'équilibrage (rotations). \\
+    \textbf{Complexité :} \\
+        $O(\log n + k)$ descente récursive dans l'arbre (hauteur bornée par $\log n$) + insertion dans la liste des positions $k$ (avec $k$ qui est négligeable si le texte contient des mots distincts).
+
+    \item \textbf{T\_Position* ajouterPosition(T\_Position* listeP, ...)} \\
+    Insère une position triée dans la liste locale d'un mot et met à jour le chaînage global du texte. \\
+    \textbf{Complexité :} \\
+        $O(k)$ parcours linéaire dépendant du nombre $k$ d'occurrences déjà existantes pour ce mot.\\
+
+    \item \textbf{int ajouterOccurence(T\_Index *index, char *mot, ...)} \\
+    Prépare le mot (en minuscules pour comparer) et appelle l'insertion AVL. \\
+    \textbf{Complexité :} \\
+        $O(L + InsertionAVL)$ transformation du mot de longueur $L$ en minuscules + coût d'insertion dans l'AVL.
+
+\end{itemize}
+
+\section{Fonctions Principales}
+
+\begin{itemize}
+    \item \textbf{1. int indexerFichier(T\_Index *index, char *filename)} \\
+    Lit le fichier .txt, découpe les mots et construit toute la structure. \\
+    \textbf{Complexité :} \\
+        $O(N + n \log n)$ \\
+        Lecture linéaire de $N$ caractères. Ensuite, pour les $n$ mots (tous supposés distincts dans le pire cas), l'insertion AVL coûte $\log n$.
+
+    \item \textbf{2. Caractéristiques de l'index (via T\_Index)} \\
+   Affiche le nombre de mots total, distincts et le nombre de phrases. \\
+    \textbf{Complexité :} \\
+        $O(1)$ accès direct aux champs de la structure.
+
+    \item \textbf{3. void afficherIndex(T\_Index index)} \\
+    Affiche tout le vocabulaire trié alphabétiquement avec les positions. \\
+    \textbf{Complexité :} \\
+        $O(n)$ \\
+        La fonction parcourt chaque nœud de l'arbre et, pour chacun, parcourt toute sa liste de positions. La somme de toutes les positions correspond exactement au nombre total de mots du texte ($n$).
+
+    \item \textbf{4. T\_Noeud* rechercherMot(T\_Index* index, char *mot)} \\
+    Recherche un mot spécifique dans l'arbre. \\
+    \textbf{Complexité :} \\
+        $O(\log n)$ \\
+        Descente dans l'arbre AVL. La hauteur est bornée par $\log n$ et la comparaison des mots est considérée comme une opération constante.
+
+    \item \textbf{5. void afficherOccurencesMot(T\_Index* index, char* mot)} \\
+    Affiche les phrases complètes où apparaît le mot recherché. \\
+    \textbf{Complexité :} \\
+        $O(\log n + k \times P)$ Le temps d'exécution dépend de la recherche dans l'arbre ($\log n$) et du nombre total de mots ($k$) composant les phrases ($P$) à afficher.
+
+    \item \textbf{6. void construireTexte(T\_Index index, char *filename)} \\
+    Reconstruit le texte original dans un fichier de sortie. \\
+    \textbf{Complexité :} \\
+        $O(n)$ parcours strictement linéaire des $n$ mots grâce au chaînage chronologique des positions (via les pointeurs \texttt{suivTexte}), sans traverser l'arbre.\\
+\end{itemize}
