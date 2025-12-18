@@ -12,6 +12,7 @@
 #define KBUP 328
 #define KBDOWN 336
 
+/// Declaration des structures de données
 typedef struct _Position
 {
     int numeroLigne;
@@ -44,37 +45,7 @@ typedef struct _Index
     T_Position* debutTexte; // Pointeur vers le tout premier mot (Essentiel pour reconstruire)
 } T_Index;
 
-
-
-/*
-// Anciennes structures pour la gestion par Piles
-typedef struct _celluleMot
-{
-    char* mot;
-} celluleMot;
-
-typedef struct _Pile
-{
-    celluleMot* tab;
-    int* ligne;
-    int sommet;
-    int Longueur;
-} Pile;
-
-typedef struct _element
-{
-    int numphrase;
-    Pile* phrase;
-} Element;
-
-typedef struct CellulePhrase {
-    int numeroPhrase;
-    // T_CelluleMot *listeMots; // Note : T_CelluleMot n'etait pas defini dans ton snippet original
-    struct CellulePhrase *suivant;
-} T_CellulePhrase;
-*/
-
-/// DÃ©claration du menu
+/// Déclaration du menu
 void initialisation(char** LM);
 int menu(char** tab, COORD O);
 
@@ -85,7 +56,7 @@ int getEquilibre(T_Noeud *N);
 T_Noeud *rotationDroite(T_Noeud *y);
 T_Noeud *rotationGauche(T_Noeud *x);
 
-/// Fonctions Principales (Mises Ã  jour avec dernierPos)
+/// Fonctions Principales (Mises à jour avec dernierPos)
 
 // Ajout de dernierPos pour le chainage
 T_Noeud* insererAVL(T_Noeud* node, char* mot_traite, char* mot_init, int ligne, int ordreL, int phrase, int ordreP, int* estNouveau, T_Position** dernierPos);
@@ -103,10 +74,10 @@ void construireTexteCouleur(T_Index index, const char* mot);
 void afficherIndex(T_Index index);
 void afficherArbreRec(T_Noeud *noeud, char *derniereLettre);
 
-// Nouvelle version optimisÃ©e (sans argument Point)
+// Nouvelle version optimisée (sans argument Point)
 void afficherOccurencesMot(T_Index* index, char* mot);
 
-// Nouvelle version optimisÃ©e (sans argument listePoints)
+// Nouvelle version optimisée (sans argument listePoints)
 void construireTexte(T_Index index, char *filename);
 
 
@@ -115,19 +86,5 @@ void construireTexte(T_Index index, char *filename);
 void color(int t,int f);
 void gotoxy(int x, int y);
 
-
-
-/*
-// --- Fonctions de gestion des Piles ---
-Pile* creer_pile(int l);
-void supprimer_Pile(Pile* P);
-int est_vide(Pile* P);
-int est_pleine(Pile* P);
-void empiler(Pile* P, char* mot, int ordre,int ligne);
-char* depiler(Pile* P);
-int dicho_search(Element* tab, int X, int debut, int fin);
-void parcours_position(T_Position* X, Element* E, int taille_E);
-void parcours_infixe(T_Noeud* X, Element* E, int taille_E);
-*/
 
 #endif

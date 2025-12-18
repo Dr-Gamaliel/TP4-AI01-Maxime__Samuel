@@ -1,0 +1,18 @@
+# depslib dependency file v1.0
+1765970058 source:d:\utc\cours\gi01\ai01-algorithmique\tp\tp4\tp4\fonction_secondaire.c
+	"tp4.h"
+
+1765970194 d:\utc\cours\gi01\ai01-algorithmique\tp\tp4\tp4\tp4.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<windows.h>
+	<conio.h>
+	<wincon.h>
+
+1765969454 source:d:\utc\cours\gi01\ai01-algorithmique\tp\tp4\tp4\main.c
+	"tp4.h"
+
+1765969844 source:d:\utc\cours\gi01\ai01-algorithmique\tp\tp4\tp4\tp4.c
+	"tp4.h"
+

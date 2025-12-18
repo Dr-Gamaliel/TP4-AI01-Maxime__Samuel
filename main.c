@@ -60,7 +60,7 @@ int main()
             }
             break;
 
-        case 2: // CaractÃ©ristiques de l'index
+        case 2: // Caractéristiques de l'index
             printf("--- %s ---\n", LM[choix]);
             if (index.nbMotsTotal == 0) {
                 printf("L'index est vide. Veuillez charger un fichier d'abord.\n");
@@ -144,7 +144,7 @@ int main()
         if (choix != 7) {
             printf("\n");
         }
-system("pause");
+        system("pause");
     } while(choix != 7);
 
     return 0;
